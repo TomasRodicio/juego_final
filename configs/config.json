@@ -1,0 +1,31 @@
+{
+    "stage_1": {
+        
+        
+        "player": {
+            "player_img": "assets/img/player/idle/Idle1.png",
+            "coords_player":
+            {
+                "coord_x": 20,
+                "coord_y": 800
+            }
+        },
+        "stage": {
+            "max_amount_enemies": 3,
+            "coords_enemies": [
+                {
+                    "coord_x": 50,
+                    "coord_y": 150
+                },
+                {
+                    "coord_x": 200,
+                    "coord_y": 80
+                },
+                {
+                    "coord_x": 400,
+                    "coord_y": 20
+                }
+            ]
+        }
+    }
+}
