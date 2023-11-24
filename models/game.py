@@ -25,6 +25,6 @@ class Game:
                     sys.exit()
 
             screen.blit(back_img, back_img.get_rect())
-            delta_ms = clock.tick(30)
+            delta_ms = clock.tick(60)
             game.run(delta_ms)
             pygame.display.flip()

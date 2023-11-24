@@ -16,7 +16,7 @@ class Stage:
             # Dibujar todos los grupos de sprites
 
             # Actualizar y Dibujar Jugador
-            self.player.update(delta_ms)
+            self.player.update(delta_ms, self.__main_screen)
             self.player.draw(self.__main_screen)
             
             #self.enemies.draw(screen)
