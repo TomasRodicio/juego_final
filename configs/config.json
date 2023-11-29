@@ -3,7 +3,7 @@
         
         
         "player": {
-            "player_img": "assets/img/player/idle/Idle1.png",
+            "player_img": "assets/img/player/idle/Idle.png",
             "coords_player":
             {
                 "coord_x": 20,
