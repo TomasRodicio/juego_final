@@ -29,22 +29,22 @@
             ]
         },
         "stage_map": [
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "                                                 ",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
         ]
     }
 }

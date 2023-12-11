@@ -31,13 +31,13 @@ class Stage:
     def spawn_enemies(self):
         if self.__number_enemies > len(self.__coords_enemies):
             for coord in self.__coords_enemies:
-                enemy_sprite = Enemy((coord.get('coord_x'), coord.get('coord_y')), self.__limit_w, self.__limit_h, self.__configs)
-                self.enemies.add(enemy_sprite)
+                self.enemy_sprite = Enemy((coord.get('coord_x'), coord.get('coord_y')), self.__limit_w, self.__limit_h, self.__configs)
+                self.enemies.add(self.enemy_sprite)
                 
         elif self.__number_enemies <= len(self.__coords_enemies):
             for coord in range(self.__number_enemies):
-                enemy_sprite = Enemy((self.__coords_enemies[coord].get('coord_x'), self.__coords_enemies[coord].get('coord_y')), self.__limit_w, self.__limit_h, self.__configs)
-                self.enemies.add(enemy_sprite)
+                self.enemy_sprite = Enemy((self.__coords_enemies[coord].get('coord_x'), self.__coords_enemies[coord].get('coord_y')), self.__limit_w, self.__limit_h, self.__configs)
+                self.enemies.add(self.enemy_sprite)
 
     
     def create_stage(self, layeout):
@@ -52,6 +52,12 @@ class Stage:
                     case "D":
                         tile_sprite = Tile((x,y), tile_size, 'assets/img/platforms/dirt.png')
                         self.tiles.add(tile_sprite)
+                    case "0":
+                        tile_sprite = Tile((x,y), tile_size, 'assets/img/platforms/left_grass.png')
+                        self.tiles.add(tile_sprite)
+                    case "1":
+                        tile_sprite = Tile((x,y), tile_size, 'assets/img/platforms/right_grass.png')
+                        self.tiles.add(tile_sprite)
             
 
         
@@ -63,8 +69,7 @@ class Stage:
     def player_movement_collitions(self):
         self.player_platform_hit_list = pygame.sprite.spritecollide(self.player_sprite, self.tiles, False)
         
-        for enemy in self.enemies:
-            self.enemy_platform_hit_list = pygame.sprite.spritecollide(self.enemy_sprite, self.tiles, False)
+        self.enemy_platform_hit_list = pygame.sprite.groupcollide(self.enemies, self.tiles, False, False)
 
 
     def run(self, delta_ms):
@@ -75,6 +80,6 @@ class Stage:
             self.tiles.update(self.__main_screen)
             self.player_movement_collitions()
             self.player.update(delta_ms, self.__main_screen, self.player_platform_hit_list)
-            self.enemies.update(delta_ms, self.__main_screen)
+            self.enemies.update(delta_ms, self.__main_screen, self.enemy_platform_hit_list)
         
         

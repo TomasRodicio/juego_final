@@ -64,27 +64,27 @@ class Enemy(pygame.sprite.Sprite):
     def constraint(self):  # Ajusta al jugador a los limites de la pantalla
         if self.__is_looking_right:
             if (self.rect.right + self.__speed_walk ) < self.__max_constraint_x:
-                self.rect.x += self.__speed_walk
+                self.add_x(self.__speed_walk)
             else:
                 self.__is_looking_right = False
                 self.change_animation(self.__walk_l)
                 self.walk(direction='Left')
         else:
             if self.rect.left - self.__speed_walk > 0:
-                self.rect.x -= self.__speed_walk
+                self.add_x(-self.__speed_walk)
             else:
                 self.__is_looking_right = True
                 self.change_animation(self.__walk_r)
                 self.walk(direction='Right')
     
 
-    def do_movement(self, delta_ms):
+    def do_movement(self, delta_ms, plataformas):
         self.__time_move += delta_ms
         if self.__time_move >= self.__frame_rate:
             self.constraint()
-            if self.rect.y < 300:
-                self.rect.y += self.__gravity
-            else: self.rect.y += self.__move_y
+            if not self.is_on_ground(plataformas):
+                self.add_y(self.__gravity)
+            else: self.add_y(self.__move_y)
 
     
     def do_animation(self, delta_ms):
@@ -105,11 +105,20 @@ class Enemy(pygame.sprite.Sprite):
     def add_y(self, delta_y):
         self.rect.y += delta_y
         self.rect_ground_collition.y += delta_y
+
+
+    def is_on_ground(self, plataformas):
+        retorno = False
+        for plataforma in plataformas:
+            if self.rect_ground_collition.colliderect(plataforma.rect_ground_collition):
+                retorno = True
+                break
+        return retorno
         
 
-    def update(self, delta_ms, screen: pygame.surface.Surface):
+    def update(self, delta_ms, screen: pygame.surface.Surface, plataformas):
         self.draw(screen)
-        self.do_movement(delta_ms)
+        self.do_movement(delta_ms, plataformas)
         self.do_animation(delta_ms)
         # self.recharge()
         self.__bullet_group.draw(screen)
@@ -119,6 +128,7 @@ class Enemy(pygame.sprite.Sprite):
     def draw(self, screen: pygame.surface.Surface):
         if DEBUG:
             pygame.draw.rect(screen, 'red', self.rect)
+            pygame.draw.rect(screen, 'blue', self.rect_ground_collition)
         self.__actual_img_animation = self.__actual_animation[self.__initial_frame]
         self.image = self.__actual_img_animation
         screen.blit(self.__actual_img_animation, self.rect)

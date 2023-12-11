@@ -115,7 +115,6 @@ class Player(pygame.sprite.Sprite):
 
     def create_arrow(self):
         if self.__is_looking_right:
-            
             return Bullet(self.rect.right, self.rect.centery, "right", "assets/img/player/bullet/Arrow.png")
         else:
             return Bullet(self.rect.left, self.rect.centery, "left", "assets/img/enemy/bullet/Arrow.png")
