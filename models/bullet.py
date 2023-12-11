@@ -1,5 +1,5 @@
 import pygame
-from auxiliar.constantes import screen_w
+from auxiliar.constantes import *
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, direction, img_path: str):
@@ -14,8 +14,9 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.image.load(img_path)
         
 
-    def update(self):
-        
+    def update(self, screen):
+        if DEBUG:
+            pygame.draw.rect(screen, 'red', self.rect)
         match self.direction:
             case 'right':
                 self.rect.x += 20

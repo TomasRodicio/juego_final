@@ -1,10 +1,10 @@
 import json
 
-screen_w = 800
-screen_h = 600
+screen_w = 1600
+screen_h = 800
+tile_size = 50
 CONFIG_FILE_PATH = './configs/config.json'
 DEBUG = False
-
 
 def open_configs() -> dict:
     with open(CONFIG_FILE_PATH, 'r', encoding='utf-8') as config:

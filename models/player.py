@@ -5,21 +5,21 @@ from models.bullet import Bullet
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, constraint_x, constraint_y, stage_dict_configs: dict, frame_rate = 80, speed_run = 30, gravity = 16, jump = 32):
+    def __init__(self, constraint_x, constraint_y, stage_dict_configs: dict, frame_rate = 60, speed_run = 30, gravity = 16, jump = 32):
         super().__init__()
 
         self.__player_configs = stage_dict_configs.get('player')
         self.__player_cords = self.__player_configs['coords_player']
-        self.__iddle_r = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1, step = 2)
-        self.__iddle_l = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1, step = 2, flip=True)
-        self.__run_r = sm.get_surface('./assets/img/player/run/Run.png', 8, 1, step = 2)
-        self.__run_l = sm.get_surface('./assets/img/player/run/Run.png', 8, 1, step = 2, flip=True)
-        self.__jump_r = sm.get_surface('./assets/img/player/jump/Jump.png', 9, 1, step = 2)
-        self.__jump_l = sm.get_surface("./assets/img/player/jump/Jump.png", 9, 1, step = 2, flip=True)
-        self.__shoot_r = sm.get_surface("./assets/img/player/attack/Shoot.png", 14, 1, step = 2)
-        self.__shoot_l = sm.get_surface("./assets/img/player/attack/Shoot.png", 14, 1, step = 2, flip=True)
-        self.__move_x = self.__player_cords['coord_x']
-        self.__move_y = self.__player_cords['coord_y']
+        self.__iddle_r = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1)
+        self.__iddle_l = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1, flip=True)
+        self.__run_r = sm.get_surface('./assets/img/player/run/Run.png', 8, 1)
+        self.__run_l = sm.get_surface('./assets/img/player/run/Run.png', 8, 1, flip=True)
+        self.__jump_r = sm.get_surface('./assets/img/player/jump/Jump.png', 9, 1)
+        self.__jump_l = sm.get_surface("./assets/img/player/jump/Jump.png", 9, 1, flip=True)
+        self.__shoot_r = sm.get_surface("./assets/img/player/attack/Shoot.png", 14, 1)
+        self.__shoot_l = sm.get_surface("./assets/img/player/attack/Shoot.png", 14, 1, flip=True)
+        self.__move_x = 0
+        self.__move_y = 0
         self.__speed_run = speed_run
         self.__jump = jump
         self.__max_constraint_x = constraint_x
@@ -33,8 +33,12 @@ class Player(pygame.sprite.Sprite):
         self.__actual_img_animation = self.__actual_animation[self.__initial_frame]
         self.image = self.__actual_img_animation
         self.rect = self.image.get_rect()
+        self.rect.x = self.__player_cords['coord_x']
+        self.rect.y = self.__player_cords['coord_y']
         self.__is_looking_right = True
         self.__is_jumping = False
+        self.__is_falling = False
+        self.__on_ground = True
 
         self.__ready = True
         self.__bullet_time = 0
@@ -42,15 +46,17 @@ class Player(pygame.sprite.Sprite):
         self.__bullet_group = pygame.sprite.Group()
         self.__puntaje = 0  
 
+        self.rect_ground_collition = pygame.Rect(self.rect.x + self.rect.w / 4, self.rect.y + self.rect.h - 10, self.rect.w / 2, 10)
+
     def __set_x_animations_preset(self, move_x, animation_list: list[pygame.surface.Surface], look_r: bool):
         self.__move_x = move_x
         self.__actual_animation = animation_list
         self.__is_looking_right = look_r
 
 
-    def __set_y_animations_preset(self, move_y):
-        self.__move_y = move_y
-        self.__move_x = self.__speed_run if self.__is_looking_right else -self.__speed_run
+    def __set_y_animations_preset(self):
+        self.__move_y = -self.__jump
+        # self.__move_x = self.__speed_run if self.__is_looking_right else -self.__speed_run
         self.__actual_animation = self.__jump_r if self.__is_looking_right else self.__jump_l
         self.__initial_frame = 0
         self.__is_jumping = True
@@ -62,7 +68,7 @@ class Player(pygame.sprite.Sprite):
             self.run('Right')
         if keys[pygame.K_a]:
             self.run('Left')
-        if not keys[pygame.K_d] and not keys[pygame.K_a]:
+        if not keys[pygame.K_d] and not keys[pygame.K_a] and not keys[pygame.K_SPACE] and not keys[pygame.K_j]:
             self.stay()
         if keys[pygame.K_j] and self.__ready:
             self.shoot_arrow()
@@ -83,17 +89,16 @@ class Player(pygame.sprite.Sprite):
     
 
     def stay(self):
-        if self.__actual_animation != self.__iddle_l and self.__actual_animation != self.__iddle_r:
-            self.__actual_animation = self.__iddle_r if self.__is_looking_right else self.__iddle_l
-            self.__initial_frame = 0
+       if self.__actual_animation not in (self.__iddle_l, self.__iddle_r):
+            self.change_animation(self.__iddle_r) if self.__is_looking_right else  self.change_animation(self.__iddle_l)
             self.__move_x = 0
             self.__move_y = 0
+    
 
     
     def jump(self):
-        if not self.__is_jumping:
-
-            self.__set_y_animations_preset(self.__jump)
+        if not self.__is_jumping and not self.__is_falling:
+            self.__set_y_animations_preset() 
     
     
     @property
@@ -103,7 +108,8 @@ class Player(pygame.sprite.Sprite):
 
     def shoot_arrow(self):
         self.__bullet_group.add(self.create_arrow())
-        self.__actual_animation = self.__shoot_r if self.__is_looking_right else self.__shoot_l
+        self.change_animation(self.__shoot_r if self.__is_looking_right else self.__shoot_l)
+        
         
 
 
@@ -141,13 +147,20 @@ class Player(pygame.sprite.Sprite):
     
 
 
-    def do_movement(self, delta_ms):
+    def do_movement(self, delta_ms, plataformas):
         self.__player_move_time += delta_ms
         if self.__player_move_time >= self.__frame_rate:
             self.__player_move_time = 0
-            self.rect.x += self.__set_borders_limits_x()
-            self.rect.y += self.__set_borders_limits_y()
+            self.add_x(self.__set_borders_limits_x())
+            self.add_y(self.__set_borders_limits_y())
             # Parte relacionado a saltar
+            if not self.is_on_ground(plataformas):
+                self.add_y(self.__gravity)
+                self.__is_falling = True
+            else:
+                self.add_y(self.__move_y)
+                self.__is_falling = False
+
             
     
 
@@ -159,6 +172,36 @@ class Player(pygame.sprite.Sprite):
                 self.__initial_frame += 1
             else:
                 self.__initial_frame = 0
+                if self.__is_jumping:
+                    self.__is_jumping = False
+                    self.__move_y = 0
+    
+
+    def add_x(self, delta_x):
+        self.rect.x += delta_x
+        self.rect_ground_collition.x += delta_x
+    
+    
+    def add_y(self, delta_y):
+        self.rect.y += delta_y
+        self.rect_ground_collition.y += delta_y
+
+    
+    def change_animation(self, nueva_animacion: list[pygame.surface.Surface]):
+        self.__actual_animation = nueva_animacion
+        if self.__initial_frame > 0:
+            self.__initial_frame = 0
+        self.__actual_img_animation = self.__actual_animation[self.__initial_frame]
+    
+
+    def is_on_ground(self, plataformas):
+        retorno = False
+        for plataforma in plataformas:
+            if self.rect_ground_collition.colliderect(plataforma.rect_ground_collition):
+                retorno = True
+                break
+        return retorno
+        
 
 
 
@@ -176,20 +219,21 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom >= self.__max_constraint_y:
             self.rect.bottom = self.__max_constraint_y
     
-    def update(self, delta_ms, screen: pygame.surface.Surface):
+    def update(self, delta_ms, screen: pygame.surface.Surface, plataformas):
         self.eventos_teclado()
         self.constraint()
         self.draw(screen)
-        self.do_movement(delta_ms)
+        self.do_movement(delta_ms, plataformas)
         self.do_animation(delta_ms)
         self.recharge()
         self.__bullet_group.draw(screen)
-        self.__bullet_group.update()
+        self.__bullet_group.update(screen)
 
 
     def draw(self, screen: pygame.surface.Surface):
         if DEBUG:
             pygame.draw.rect(screen, 'red', self.rect)
+            pygame.draw.rect(screen, 'blue', self.rect_ground_collition)
         self.__actual_img_animation = self.__actual_animation[self.__initial_frame]
         self.image = self.__actual_img_animation
         screen.blit(self.image, self.rect)
