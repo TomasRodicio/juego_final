@@ -3,7 +3,9 @@ import sys
 from auxiliar.constantes import *
 from models.stage import Stage
 from models.button import Button
+from models.textbox import TextBox
 from models.menu import Menu
+import sqlite3
 
 class Game:
     
@@ -65,6 +67,7 @@ class Game:
         self.menu = Menu(self.__screen, self.__font)
         self.menu.add_button((screen_w / 2, 200), 'MUTE', 'white', self.button_mute, "", (130,30))
         self.menu.add_button((screen_w / 2, 300), 'BACK', 'white', self.button_back, "", (130,30))
+        
     
         while True:
             for event in pygame.event.get():
@@ -77,9 +80,28 @@ class Game:
 
                 pygame.display.flip()
 
+
+    def submit_score(self):
+        self.__screen.fill((0, 0, 0))
+        self.menu = Menu(self.__screen, self.__font)
+        self.menu.add_textbox((screen_w / 2, 200), (200, 30), 'black')
+        self.menu.add_button((screen_w / 2 + 200, 200), 'SUBMIT', 'white', self.submit_score_buttom, "", (130,30))
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                
+                self.menu.update(event)
+                self.menu.draw()
+
+                pygame.display.flip()
     
     
-    
+    def submit_score_buttom(self):
+        return True
+
     def button_play_click(self, param):
         self.select_level_menu()
         print("hola")
@@ -131,6 +153,13 @@ class Game:
             if game.stage_name == "stage_2" and game.stage_passed():
                 game.stage_name = "stage_3"
                 self.run_stage(game.stage_name)
+            if game.stage_name == "stage_3" and game.stage_passed():
+                print("Win!")
+                self.main_menu()
+            if game.stage_loss():
+                self.main_menu()
+        
+
             
 
             screen.blit(back_img, back_img.get_rect())

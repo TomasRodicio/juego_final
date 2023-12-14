@@ -46,6 +46,11 @@ class Enemy(pygame.sprite.Sprite):
         self.rect_right_collition = pygame.Rect(self.rect.x + self.rect.w / 2 + 10, self.rect.y + self.rect.h / 2, 10, self.rect.h / 2 - 10)
         self.rect_left_collition = pygame.Rect(self.rect.x + self.rect.w / 2 - 30, self.rect.y + self.rect.h / 2, 10, self.rect.h / 2 - 10)
 
+        self.hit_sound = pygame.mixer.Sound("assets/sounds/effects/Hit damage 1.wav")
+        pygame.mixer.Sound.set_volume(self.hit_sound, 0.2)
+        self.shoot_sound = pygame.mixer.Sound("assets/sounds/effects/fire_bow_sound-mike-koenig.wav")
+        pygame.mixer.Sound.set_volume(self.shoot_sound, 0.2)
+
 
     @property
     def get_life(self) -> int:
@@ -113,6 +118,7 @@ class Enemy(pygame.sprite.Sprite):
     def shoot_arrow(self):
         if self.__ready:
             self.__bullet_group.add(self.create_arrow())
+            pygame.mixer.Sound.play(self.shoot_sound)
             self.change_animation(self.__attack_r if self.__is_looking_right else self.__attack_l)
         
 

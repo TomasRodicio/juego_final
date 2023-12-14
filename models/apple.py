@@ -17,6 +17,7 @@ class Apple(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (self.__size / 2, self.__size / 2))
         self.rect = self.image.get_rect(topleft=pos)
         self.__heal = self.__apple_configs['heal']
+        
 
     
     @property

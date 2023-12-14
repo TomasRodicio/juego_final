@@ -12,8 +12,8 @@ class Player(pygame.sprite.Sprite):
         self.__player_configs = stage_dict_configs.get('player')
         self.__player_cords = self.__player_configs['coords_player']
         self.__players_stats = self.__player_configs['stats']
-        self.__iddle_r = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1)
-        self.__iddle_l = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1, flip=True)
+        self.__iddle_r = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1, step= 2)
+        self.__iddle_l = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1, step=2, flip=True)
         self.__run_r = sm.get_surface('./assets/img/player/run/Run.png', 8, 1)
         self.__run_l = sm.get_surface('./assets/img/player/run/Run.png', 8, 1, flip=True)
         self.__jump_r = sm.get_surface('./assets/img/player/jump/Jump.png', 9, 1)
@@ -22,6 +22,10 @@ class Player(pygame.sprite.Sprite):
         self.__shoot_l = sm.get_surface("./assets/img/player/attack/Shoot.png", 14, 1, flip=True)
         self.__dead_r = sm.get_surface("./assets/img/player/dead/Dead.png", 5, 1)
         self.__dead_l = sm.get_surface("./assets/img/player/dead/Dead.png", 5, 1, flip=True)
+        self.hit_sound = pygame.mixer.Sound("assets/sounds/effects/Hit damage 1.wav")
+        pygame.mixer.Sound.set_volume(self.hit_sound, 0.2)
+        self.shoot_sound = pygame.mixer.Sound("assets/sounds/effects/fire_bow_sound-mike-koenig.wav")
+        pygame.mixer.Sound.set_volume(self.shoot_sound, 0.2)
         self.__move_x = 0
         self.__move_y = 0
         self.__speed_run = speed_run
@@ -133,6 +137,7 @@ class Player(pygame.sprite.Sprite):
                 self.stay()
             if keys[pygame.K_j] and self.__ready:
                 self.shoot_arrow()
+                pygame.mixer.Sound.play(self.shoot_sound)
                 self.__ready = False
                 self.__bullet_time = pygame.time.get_ticks()
             if keys[pygame.K_SPACE]:
@@ -189,7 +194,7 @@ class Player(pygame.sprite.Sprite):
     def hit(self, damage):
         if self.__life > 0:
             self.__life -= damage
-    
+            pygame.mixer.Sound.play(self.hit_sound)
 
     def heal(self, value):
         self.__life += value
@@ -242,7 +247,6 @@ class Player(pygame.sprite.Sprite):
                 if self.__is_jumping:
                     self.__is_jumping = False
                     self.__move_y = 0
-    
 
     def add_x(self, delta_x):
         if not self.__on_wall_right:
@@ -285,13 +289,6 @@ class Player(pygame.sprite.Sprite):
                 self.__move_x = 0
                 print("Perdiste")
 
-    
-    def test(self):
-        if self.__is_looking_right and self.__on_wall_right:
-            self.__move_x = 0
-        elif not self.__is_looking_right and self.__on_wall_left:
-            self.__move_x = 0
-        
         
 
 

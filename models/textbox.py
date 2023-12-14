@@ -1,4 +1,5 @@
 import pygame
+import unicodedata
 
 class TextBox():
     def __init__(self, pos, size, font, font_color, color_background = "white", color_border = "black", border_size: int = -1) -> None:
@@ -14,15 +15,17 @@ class TextBox():
         self.y = pos[1]
         self.__text = ""
 
+        self.is_selected = False
+
         self.render()
     
     
     @property
-    def __text(self):
+    def text(self):
         return self.__text
     
-    @__text.setter
-    def __text(self, texto):
+    @text.setter
+    def text(self, texto):
         self.__text = texto
 
     
@@ -42,9 +45,31 @@ class TextBox():
         media_text_vertical = self.__text_render.get_height() / 2
 
         media_horizontal = self.w / 2
-        media_vertical  =self.h / 2
+        media_vertical  = self.h / 2
 
         diferencia_horizontal = media_horizontal - media_text_horizontal
         diferencia_vertical = media_vertical - media_text_vertical
 
         self.slave.blit(self.__text_render, (diferencia_horizontal, diferencia_vertical))
+
+    
+    def update(self, evento, screen):
+        if evento.type == pygame.MOUSEBUTTONDOWN:
+            if self.slave_rect_collide.collidepoint(evento.pos):
+                self.is_selected = True
+            else:
+                self.is_selected = False
+            self.render()
+        elif self.is_selected and evento.type == pygame.KEYDOWN:
+            caracter = evento.unicode
+            if evento.key == pygame.K_BACKSPACE:
+                self.__text = self.__text[:-1]
+            elif len(caracter) == 1 and unicodedata.category(caracter)[0] != "C":
+                self.__text += caracter
+            self.render()
+        self.draw(screen)
+
+    
+    def draw(self, screen: pygame.surface.Surface):
+        screen.blit(self.slave,self.slave_rect)
+        pygame.draw.rect(screen, self.color_border, self.slave_rect, self.border_size)

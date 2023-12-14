@@ -28,7 +28,7 @@
             "stats":
             {
                 "life": 100,
-                "damage": 40
+                "damage": 2
             }
         },
         "stage_settings": {

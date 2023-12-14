@@ -37,6 +37,10 @@ class Stage:
         self.__win = False
         self.__lose = False
         self.__stage_name = stage_name
+        self.collect_apple_sound = pygame.mixer.Sound("assets/sounds/effects/Fruit collect 1.wav")
+        pygame.mixer.Sound.set_volume(self.collect_apple_sound, 0.2)
+        self.collect_coin_sound = pygame.mixer.Sound("assets/sounds/effects/coin-collect-retro-8-bit-sound-effect-145251.mp3")
+        pygame.mixer.Sound.set_volume(self.collect_coin_sound, 0.2)
 
         self.spawn_enemies()
         self.create_stage(self.__stage_map)
@@ -50,6 +54,10 @@ class Stage:
     @stage_name.setter
     def stage_name(self, name):
         self.__stage_name = name
+
+    @property
+    def score(self):
+        return self.__score
 
 
 
@@ -156,10 +164,12 @@ class Stage:
         for coin in self.coins:
             if coin in self.collect_coin:
                 self.__score += coin.value
+                pygame.mixer.Sound.play(self.collect_coin_sound)
                 coin.kill()
         for apple in self.apples:
             if apple in self.collect_apple:
                 self.player.sprite.heal(apple.heal)
+                pygame.mixer.Sound.play(self.collect_apple_sound)
                 apple.kill()
         
 
@@ -181,7 +191,6 @@ class Stage:
         for tile in self.tiles:
             if self.player.sprite.rect_ceiling_collition.colliderect(tile.rect_ceiling_collition):
                 self.player.sprite.on_ceiling = True
-                print(self.player.sprite.on_ceiling)
             else:
                 self.player.sprite.on_ceiling = False
             if self.player.sprite.rect_left_collition.colliderect(tile.rect_right_collition):
@@ -227,6 +236,9 @@ class Stage:
     
     def stage_passed(self):
         return self.__win
+    
+    def stage_loss(self):
+        return self.__lose
 
 
 
