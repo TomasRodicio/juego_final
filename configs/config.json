@@ -6,45 +6,198 @@
             "player_img": "assets/img/player/idle/Idle.png",
             "coords_player":
             {
-                "coord_x": 20,
-                "coord_y": 300
+                "coord_x": 10,
+                "coord_y": 500
+            },
+            "stats":
+            {
+                "life": 100,
+                "damage": 50
+            }
+        },
+        "enemies": {
+            "enemies_score": 100,
+            "number_enemies": 1,
+            "coords_enemies": [
+
+                {
+                    "coord_x": 200,
+                    "coord_y": 300
+                }
+            ],
+            "stats":
+            {
+                "life": 100,
+                "damage": 40
+            }
+        },
+        "stage_settings": {
+            "stage_map" : [
+
+                "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+                "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+                "                                ",
+                "                                ",
+                "     CC                         ",
+                "     XX                         ",
+                "A                               ",
+                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "                       XXDDDDDDD",
+                "                     XXDDDDDDDDD",
+                "                   XXXDDDDDDDDDD",
+                "    CCC         XXXXXXDDDDDDDDDD",
+                "    XXX        XXDDDDDDDDDDDDDDD",
+                "              XXDDDDDDDDDDDDDCDD",
+                "XXXXXXXXXX  XXXXXXXXXXXXXXXXXXXX",
+                "DDDDDDDDDDTTDDDDDDDDDDDDDDDDDDDD"
+            ],
+            "time_seconds": 90
+        }, 
+        "coins": {
+            "value": 50
+        },
+        "traps": {
+            "damage": 100
+        },
+        "apple": {
+            "heal": 30
+        }
+    },
+    "stage_2": {
+        "player": {
+            "player_img": "assets/img/player/idle/Idle.png",
+            "coords_player":
+            {
+                "coord_x": 10,
+                "coord_y": 200
+            },
+            "stats":
+            {
+                "life": 100,
+                "damage": 1
+            }
+        },
+        "enemies": {
+            "enemies_score": 100,
+            "number_enemies": 2,
+            "coords_enemies": [
+
+                {
+                    "coord_x": 30,
+                    "coord_y": 650
+                },
+                {
+                    "coord_x": 1550,
+                    "coord_y": 700
+                }
+            ],
+            "stats":
+            {
+                "life": 2,
+                "damage": 1
+            }
+        },
+        "stage_settings": {
+            "stage_map" : [
+
+                "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+                "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+                "                                ",
+                "                           CC   ",
+                "                        CC XX   ",
+                "                        XX      ",
+                "                                ",
+                "XXXXXXXXX  XXXXXX  XXXXXXXXXXXXX",
+                "        DTTD                    ",
+                "        DDDD                    ",
+                "                                ",
+                "  A                         CC  ",
+                "  X                         XX  ",
+                "                                ",
+                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+            ],
+            "time_seconds": 90
+        }, 
+        "coins": {
+            "value": 50
+        },
+        "traps": {
+            "damage": 100
+        },
+        "apple": {
+            "heal": 30
+        }
+    },
+    "stage_3": {
+        "player": {
+            "player_img": "assets/img/player/idle/Idle.png",
+            "coords_player":
+            {
+                "coord_x": 10,
+                "coord_y": 500
+            },
+            "stats":
+            {
+                "life": 100,
+                "damage": 1
             }
         },
         "enemies": {
             "enemies_score": 100,
             "number_enemies": 3,
             "coords_enemies": [
+
                 {
-                    "coord_x": 50,
+                    "coord_x": 500,
                     "coord_y": 300
                 },
                 {
-                    "coord_x": 200,
+                    "coord_x": 20,
                     "coord_y": 300
                 },
                 {
-                    "coord_x": 400,
+                    "coord_x": 1400,
                     "coord_y": 300
                 }
-            ]
+            ],
+            "stats":
+            {
+                "life": 2,
+                "damage": 1
+            }
         },
-        "stage_map": [
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "                                ",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
-        ]
+        "stage_settings": {
+            "stage_map" : [
+
+                "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+                "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+                "                                ",
+                "     CC  A                      ",
+                "  CC XX                         ",
+                "  XX                            ",
+                "                                ",
+                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "               CC               ",
+                "               XX   CC          ",
+                "                    XX          ",
+                "    CCC                  CC     ",
+                "    XXX                  XX     ",
+                "                                ",
+                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+            ],
+            "time_seconds": 90
+        }, 
+        "coins": {
+            "value": 50
+        },
+        "traps": {
+            "damage": 100
+        },
+        "apple": {
+            "heal": 30
+        }
+
     }
 }

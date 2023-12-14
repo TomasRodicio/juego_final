@@ -1,15 +1,17 @@
 import pygame
+import sys
 from auxiliar.auxiliar import SurfaceManager as sm
 from auxiliar.constantes import *
 from models.bullet import Bullet
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, constraint_x, constraint_y, stage_dict_configs: dict, frame_rate = 60, speed_run = 30, gravity = 16, jump = 32):
+    def __init__(self, constraint_x, constraint_y, stage_dict_configs: dict, frame_rate = 40, speed_run = 20, gravity = 16, jump = 30):
         super().__init__()
 
         self.__player_configs = stage_dict_configs.get('player')
         self.__player_cords = self.__player_configs['coords_player']
+        self.__players_stats = self.__player_configs['stats']
         self.__iddle_r = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1)
         self.__iddle_l = sm.get_surface('./assets/img/player/idle/Idle.png', 9, 1, flip=True)
         self.__run_r = sm.get_surface('./assets/img/player/run/Run.png', 8, 1)
@@ -18,6 +20,8 @@ class Player(pygame.sprite.Sprite):
         self.__jump_l = sm.get_surface("./assets/img/player/jump/Jump.png", 9, 1, flip=True)
         self.__shoot_r = sm.get_surface("./assets/img/player/attack/Shoot.png", 14, 1)
         self.__shoot_l = sm.get_surface("./assets/img/player/attack/Shoot.png", 14, 1, flip=True)
+        self.__dead_r = sm.get_surface("./assets/img/player/dead/Dead.png", 5, 1)
+        self.__dead_l = sm.get_surface("./assets/img/player/dead/Dead.png", 5, 1, flip=True)
         self.__move_x = 0
         self.__move_y = 0
         self.__speed_run = speed_run
@@ -39,14 +43,70 @@ class Player(pygame.sprite.Sprite):
         self.__is_jumping = False
         self.__is_falling = False
         self.__on_ground = True
+        self.__on_ceiling = False
+        self.__on_wall_right = False
+        self.__on_wall_left = False
+        self.__is_alive = True
 
         self.__ready = True
         self.__bullet_time = 0
-        self.__bullet_cooldown = 1000
+        self.__bullet_cooldown = 850
         self.__bullet_group = pygame.sprite.Group()
-        self.__puntaje = 0  
+
+        self.__life = self.__players_stats['life']
+        self.__damage = self.__players_stats['damage']
 
         self.rect_ground_collition = pygame.Rect(self.rect.x + self.rect.w / 4, self.rect.y + self.rect.h - 10, self.rect.w / 2, 10)
+        self.rect_ceiling_collition = pygame.Rect(self.rect.x + self.rect.w / 4, self.rect.y + self.rect.h / 2 - 10, self.rect.w / 2, 10)
+        self.rect_right_collition = pygame.Rect(self.rect.x + self.rect.w / 2 + 10, self.rect.y + self.rect.h / 2, 10, self.rect.h / 2)
+        self.rect_left_collition = pygame.Rect(self.rect.x + self.rect.w / 2 - 30, self.rect.y + self.rect.h / 2, 10, self.rect.h / 2)
+
+    
+    @property
+    def get_life(self) -> int:
+        return self.__life
+
+
+    @property
+    def get_damage(self):
+        return self.__damage
+    
+    
+    @property
+    def get_bullets(self) -> list[Bullet]:
+        return self.__bullet_group
+
+
+    @property
+    def on_ceiling(self):
+        return self.__on_ceiling
+    
+
+    @on_ceiling.setter
+    def on_ceiling(self, status):
+        self.__on_ceiling = status
+
+    
+    @property
+    def on_wall_right(self):
+        return self.__on_wall_right
+    
+
+    @on_wall_right.setter
+    def on_wall_right(self, status):
+        self.__on_wall_right = status
+    
+
+    @property
+    def on_wall_left(self):
+        return self.__on_wall_left
+    
+
+    @on_wall_left.setter
+    def on_wall_left(self, status):
+        self.__on_wall_left = status
+
+
 
     def __set_x_animations_preset(self, move_x, animation_list: list[pygame.surface.Surface], look_r: bool):
         self.__move_x = move_x
@@ -64,19 +124,20 @@ class Player(pygame.sprite.Sprite):
 
     def eventos_teclado(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_d]:
-            self.run('Right')
-        if keys[pygame.K_a]:
-            self.run('Left')
-        if not keys[pygame.K_d] and not keys[pygame.K_a] and not keys[pygame.K_SPACE] and not keys[pygame.K_j]:
-            self.stay()
-        if keys[pygame.K_j] and self.__ready:
-            self.shoot_arrow()
-            self.__ready = False
-            self.__bullet_time = pygame.time.get_ticks()
-        if keys[pygame.K_SPACE]:
-            self.jump()
-    
+        if self.__is_alive:
+            if keys[pygame.K_d]:
+                self.run('Right')
+            if keys[pygame.K_a]:
+                self.run('Left')
+            if not keys[pygame.K_d] and not keys[pygame.K_a] and not keys[pygame.K_SPACE] and not keys[pygame.K_j]:
+                self.stay()
+            if keys[pygame.K_j] and self.__ready:
+                self.shoot_arrow()
+                self.__ready = False
+                self.__bullet_time = pygame.time.get_ticks()
+            if keys[pygame.K_SPACE]:
+                self.jump()
+        
 
     def run(self, direction: str):
         match direction:
@@ -101,23 +162,21 @@ class Player(pygame.sprite.Sprite):
             self.__set_y_animations_preset() 
     
     
-    @property
-    def get_bullets(self) -> list[Bullet]:
-        return self.__bullet_group
 
 
     def shoot_arrow(self):
         self.__bullet_group.add(self.create_arrow())
-        self.change_animation(self.__shoot_r if self.__is_looking_right else self.__shoot_l)
+        if self.__actual_animation not in (self.__shoot_l, self.__shoot_r):
+            self.change_animation(self.__shoot_r if self.__is_looking_right else self.__shoot_l)
         
         
 
 
     def create_arrow(self):
         if self.__is_looking_right:
-            return Bullet(self.rect.right, self.rect.centery, "right", "assets/img/player/bullet/Arrow.png")
+            return Bullet(self.rect.right, self.rect.centery + 10, "right", "assets/img/player/bullet/Arrow.png")
         else:
-            return Bullet(self.rect.left, self.rect.centery, "left", "assets/img/enemy/bullet/Arrow.png")
+            return Bullet(self.rect.left, self.rect.centery + 10, "left", "assets/img/player/bullet/Arrow.png")
         
 
     def recharge(self):
@@ -125,6 +184,15 @@ class Player(pygame.sprite.Sprite):
             current_time = pygame.time.get_ticks()
             if current_time - self.__bullet_time >= self.__bullet_cooldown:
                 self.__ready = True
+
+
+    def hit(self, damage):
+        if self.__life > 0:
+            self.__life -= damage
+    
+
+    def heal(self, value):
+        self.__life += value
 
     
     def __set_borders_limits_x(self):
@@ -156,7 +224,7 @@ class Player(pygame.sprite.Sprite):
             if not self.is_on_ground(plataformas):
                 self.add_y(self.__gravity)
                 self.__is_falling = True
-            else:
+            elif not self.on_ceiling:
                 self.add_y(self.__move_y)
                 self.__is_falling = False
 
@@ -169,7 +237,7 @@ class Player(pygame.sprite.Sprite):
             self.__player_animation_time = 0
             if self.__initial_frame < len(self.__actual_animation) - 1:
                 self.__initial_frame += 1
-            else:
+            elif self.__is_alive:
                 self.__initial_frame = 0
                 if self.__is_jumping:
                     self.__is_jumping = False
@@ -177,13 +245,20 @@ class Player(pygame.sprite.Sprite):
     
 
     def add_x(self, delta_x):
-        self.rect.x += delta_x
-        self.rect_ground_collition.x += delta_x
-    
+        if not self.__on_wall_right:
+            self.rect.x += delta_x
+            self.rect_ground_collition.x += delta_x
+            self.rect_ceiling_collition.x += delta_x
+            self.rect_right_collition.x += delta_x
+            self.rect_left_collition.x += delta_x
+
     
     def add_y(self, delta_y):
         self.rect.y += delta_y
         self.rect_ground_collition.y += delta_y
+        self.rect_ceiling_collition.y += delta_y
+        self.rect_right_collition.y += delta_y
+        self.rect_left_collition.y += delta_y
 
     
     def change_animation(self, nueva_animacion: list[pygame.surface.Surface]):
@@ -200,11 +275,23 @@ class Player(pygame.sprite.Sprite):
                 retorno = True
                 break
         return retorno
+    
+
+    def dead(self):
+        if self.__life <= 0:
+            if self.__actual_animation not in (self.__dead_l, self.__dead_r):
+                self.change_animation(self.__dead_r) if self.__is_looking_right else  self.change_animation(self.__dead_l)
+                self.__is_alive = False
+                self.__move_x = 0
+                print("Perdiste")
+
+    
+    def test(self):
+        if self.__is_looking_right and self.__on_wall_right:
+            self.__move_x = 0
+        elif not self.__is_looking_right and self.__on_wall_left:
+            self.__move_x = 0
         
-
-
-
-
         
 
 
@@ -219,21 +306,24 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = self.__max_constraint_y
     
     def update(self, delta_ms, screen: pygame.surface.Surface, plataformas):
+        self.do_animation(delta_ms)
+        self.do_movement(delta_ms, plataformas)
+        self.draw(screen)
         self.eventos_teclado()
         self.constraint()
-        self.draw(screen)
-        self.do_movement(delta_ms, plataformas)
-        self.do_animation(delta_ms)
         self.recharge()
+        self.dead()
         self.__bullet_group.draw(screen)
         self.__bullet_group.update(screen)
 
 
     def draw(self, screen: pygame.surface.Surface):
         if DEBUG:
-            pygame.draw.rect(screen, 'red', self.rect)
+            # pygame.draw.rect(screen, 'red', self.rect)
             pygame.draw.rect(screen, 'blue', self.rect_ground_collition)
+            pygame.draw.rect(screen, 'blue', self.rect_ceiling_collition)
+            pygame.draw.rect(screen, 'blue', self.rect_right_collition)
+            pygame.draw.rect(screen, 'blue', self.rect_left_collition)
         self.__actual_img_animation = self.__actual_animation[self.__initial_frame]
-        self.image = self.__actual_img_animation
-        screen.blit(self.image, self.rect)
+        screen.blit(self.__actual_img_animation, self.rect)
         

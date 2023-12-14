@@ -1,5 +1,6 @@
 from models.game import Game
-
+  
 
 if __name__ == '__main__':
-    Game.run_stage('stage_1')
+    game = Game()
+    game.main_menu() 
